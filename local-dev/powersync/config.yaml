@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://unpkg.com/@powersync/service-schema@latest/json-schema/powersync-config.json
+
+telemetry:
+  # Opt out of reporting anonymized usage metrics to PowerSync telemetry service
+  disable_telemetry_sharing: false
+
+# Settings for source database replication
+replication:
+  connections:
+    - type: postgresql
+      uri: postgresql://postgres:postgres@supabase_db_next-capacitor-demo:5432/postgres
+
+      # SSL settings
+      sslmode: disable # 'verify-full' (default) or 'verify-ca' or 'disable'
+
+# This is valid if using the `mongo` service defined in `ps-mongo.yaml`
+
+# Connection settings for sync bucket storage
+storage:
+  # This uses Postgres bucket storage for simplicity
+  type: postgresql
+  uri: postgresql://postgres:postgres@supabase_db_next-capacitor-demo:5432/postgres
+  # SSL settings
+  sslmode: disable # 'verify-full' (default) or 'verify-ca' or 'disable'
+
+# The port which the PowerSync API server will listen on
+port: 8080
+
+# Client (application end user) authentication settings
+client_auth:
+  supabase: true
+  # The default local development secret
+  supabase_jwt_secret: super-secret-jwt-token-with-at-least-32-characters-long

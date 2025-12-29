@@ -1,11 +1,15 @@
+import { PowerSyncInitializer } from '@/components/PowerSyncInitializer';
 import { PowerSyncContext } from '@powersync/react';
 import { PowerSyncDatabase, Schema, Table, WASQLiteOpenFactory, column } from '@powersync/web';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { supabaseConnector } from './SupabaseConnector';
+import { SupabaseConnectorProvider } from './SupabaseConnectorProvider';
 
 const SCHEMA = new Schema({
-  sighting: new Table({
+  sightings: new Table({
     date: column.text,
-    comments: column.text
+    comments: column.text,
+    user_id: column.text
   })
 });
 
@@ -15,7 +19,7 @@ export const PowerSyncProvider = ({ children }: { children: React.ReactNode }) =
       new PowerSyncDatabase({
         schema: SCHEMA,
         database: new WASQLiteOpenFactory({
-          dbFilename: 'powersync-demo.db',
+          dbFilename: 'powersync-capacitor-nextjs.db',
           /**
            * The default worker does not seem to be bundled correctly with Next.js and Turborepo.
            * This is a bundled version copied from the @powersync/web package.
@@ -25,15 +29,19 @@ export const PowerSyncProvider = ({ children }: { children: React.ReactNode }) =
            * ```
            */
           worker: '/@powersync/worker/WASQLiteDB.umd.js'
-        })
+        }),
+        sync: {
+          worker: '/@powersync/worker/SharedSyncImplementation.umd.js'
+        }
       })
   );
-  useEffect(() => {
-    return () => {
-      powerSync.close();
-    };
-  }, [powerSync]);
-  return <PowerSyncContext.Provider value={powerSync}>{children}</PowerSyncContext.Provider>;
+  return (
+    <SupabaseConnectorProvider connector={supabaseConnector}>
+      <PowerSyncContext.Provider value={powerSync}>
+        <PowerSyncInitializer>{children}</PowerSyncInitializer>
+      </PowerSyncContext.Provider>
+    </SupabaseConnectorProvider>
+  );
 };
 
 export default PowerSyncProvider;
