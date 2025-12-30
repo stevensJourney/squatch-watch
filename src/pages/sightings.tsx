@@ -113,7 +113,8 @@ export default function Sightings() {
         setDialogOpen(false);
         setSnackbarMessage(getRandomMessage(SUCCESS_MESSAGES));
         setSnackbarOpen(true);
-      } catch {
+      } catch (error) {
+        console.warn('Failed to add sighting:', error);
         setSnackbarMessage("Error: Bigfoot must've interfered with the database! 📡");
         setSnackbarOpen(true);
       }
@@ -137,7 +138,8 @@ export default function Sightings() {
       await powerSync.execute('DELETE FROM sightings WHERE id = ?', [sighting.id]);
       setSnackbarMessage('Sighting removed. Maybe it was just a bear after all... 🐻');
       setSnackbarOpen(true);
-    } catch {
+    } catch (error) {
+      console.warn('Failed to delete sighting:', error);
       setSnackbarMessage('Error: Failed to delete. The evidence persists!');
       setSnackbarOpen(true);
     }
@@ -160,7 +162,8 @@ export default function Sightings() {
         month: 'short',
         day: 'numeric'
       });
-    } catch {
+    } catch (error) {
+      console.warn('Failed to format date:', error);
       return isoDateStr;
     }
   };

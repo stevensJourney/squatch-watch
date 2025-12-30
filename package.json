@@ -7,14 +7,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:capacitor": "next build && npx cap sync",
+    "run:android": "next build && npx cap sync android && npx cap run android",
+    "run:ios": "next build && npx cap sync ios && npx cap run ios"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.2",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@journeyapps/wa-sqlite": "^1.4.1",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
+    "@powersync/capacitor": "^0.2.0",
     "@powersync/react": "^1.8.2",
     "@powersync/web": "^1.30.0",
     "@supabase/supabase-js": "^2.89.0",
@@ -24,6 +32,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

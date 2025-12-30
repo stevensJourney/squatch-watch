@@ -24,3 +24,5 @@ export const BigfootIcon = ({ size = 48, className }: BigfootIconProps) => {
 };
 
 export default BigfootIcon;
+
+

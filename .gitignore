@@ -44,6 +44,7 @@ next-env.d.ts
 # capacitor
 android
 ios
+www
 
 # @powersync workers 
 public/@powersync
