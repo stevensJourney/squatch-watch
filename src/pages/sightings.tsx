@@ -1,7 +1,6 @@
 import { BigfootIcon } from '@/components/BigfootIcon';
 import { HidingBigfoot } from '@/components/HidingBigfoot';
 import { SessionGuard } from '@/components/SessionGuard';
-import { SyncStatusIndicator } from '@/components/SyncStatusIndicator';
 import { useSupabaseConnector } from '@/services/SupabaseConnectorProvider';
 import AddIcon from '@mui/icons-material/Add';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
@@ -26,10 +25,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   Fab,
   IconButton,
-  List,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -43,7 +40,8 @@ import { usePowerSync, useQuery, useStatus } from '@powersync/react';
 import { useFormik } from 'formik';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
+import { List } from 'react-window';
 
 interface Sighting {
   id: string;
@@ -73,6 +71,163 @@ const getRandomMessage = (messages: string[]) => {
   const index = Math.floor(Math.random() * messages.length);
   return messages[index];
 };
+
+// Row height for virtualized list - taller for mobile readability
+const ROW_HEIGHT = 140;
+
+// Virtualized sightings list component
+interface SightingsListProps {
+  sightings: Sighting[];
+  canDelete: (sighting: Sighting) => boolean;
+  onDelete: (sighting: Sighting) => void;
+  formatDate: (date: string) => string;
+}
+
+interface RowProps {
+  sightings: Sighting[];
+  canDelete: (sighting: Sighting) => boolean;
+  onDelete: (sighting: Sighting) => void;
+  formatDate: (date: string) => string;
+}
+
+function SightingRow({
+  index,
+  style,
+  sightings,
+  canDelete,
+  onDelete,
+  formatDate
+}: {
+  index: number;
+  style: CSSProperties;
+  sightings: Sighting[];
+  canDelete: (sighting: Sighting) => boolean;
+  onDelete: (sighting: Sighting) => void;
+  formatDate: (date: string) => string;
+}) {
+  const sighting = sightings[index];
+  return (
+    <Box
+      style={style}
+      sx={{
+        borderBottom: '1px solid rgba(34, 139, 34, 0.15)'
+      }}>
+      <ListItem
+        sx={{
+          height: ROW_HEIGHT,
+          py: 2,
+          alignItems: 'flex-start',
+          transition: 'background 0.2s',
+          '&:hover': {
+            background: 'rgba(34, 139, 34, 0.1)'
+          }
+        }}
+        secondaryAction={
+          canDelete(sighting) ? (
+            <IconButton
+              edge="end"
+              aria-label="delete"
+              onClick={() => onDelete(sighting)}
+              sx={{
+                color: 'rgba(255,255,255,0.4)',
+                mt: 1,
+                '&:hover': {
+                  color: '#CD5C5C',
+                  background: 'rgba(205, 92, 92, 0.1)'
+                }
+              }}>
+              <DeleteIcon />
+            </IconButton>
+          ) : (
+            <Tooltip title="Not your sighting, buddy!">
+              <Chip
+                label="Other tracker"
+                size="small"
+                sx={{
+                  height: 22,
+                  fontSize: '0.7rem',
+                  mt: 1,
+                  background: 'rgba(100, 181, 246, 0.15)',
+                  color: 'rgba(100, 181, 246, 0.7)',
+                  border: '1px solid rgba(100, 181, 246, 0.3)'
+                }}
+              />
+            </Tooltip>
+          )
+        }>
+        <ListItemIcon sx={{ mt: 0.5 }}>
+          <Box sx={{ fontSize: 28 }}>👣</Box>
+        </ListItemIcon>
+        <ListItemText
+          primary={
+            <Typography
+              sx={{
+                color: '#C8E6C9',
+                fontWeight: 500,
+                fontSize: '1rem',
+                lineHeight: 1.5,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                pr: 4
+              }}>
+              {sighting.comments}
+            </Typography>
+          }
+          secondary={
+            <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+              <Typography component="span" variant="body2" sx={{ color: 'rgba(143, 188, 143, 0.6)' }}>
+                📅 {formatDate(sighting.date)}
+              </Typography>
+              {!sighting.user_id && (
+                <Chip
+                  label="Local"
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: '0.7rem',
+                    background: 'rgba(139, 69, 19, 0.2)',
+                    color: '#CD853F',
+                    border: '1px solid rgba(139, 69, 19, 0.3)'
+                  }}
+                />
+              )}
+            </Box>
+          }
+        />
+      </ListItem>
+    </Box>
+  );
+}
+
+function SightingsList({ sightings, canDelete, onDelete, formatDate }: SightingsListProps) {
+  const rowProps: RowProps = { sightings, canDelete, onDelete, formatDate };
+  const [listHeight, setListHeight] = useState(500);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      // Use 60% of viewport height, minimum 400px
+      setListHeight(Math.max(400, Math.floor(window.innerHeight * 0.6)));
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
+
+  return (
+    <List<RowProps>
+      defaultHeight={listHeight}
+      rowComponent={SightingRow}
+      rowCount={sightings.length}
+      rowHeight={ROW_HEIGHT}
+      rowProps={rowProps}
+      overscanCount={5}
+      style={{ height: listHeight }}
+    />
+  );
+}
 
 export default function Sightings() {
   const powerSync = usePowerSync();
@@ -509,82 +664,12 @@ export default function Sightings() {
                 </Typography>
               </Box>
             ) : (
-              <List sx={{ py: 0 }}>
-                {sightings.map((sighting, index) => (
-                  <Box key={sighting.id}>
-                    {index > 0 && <Divider sx={{ borderColor: 'rgba(34, 139, 34, 0.15)' }} />}
-                    <ListItem
-                      sx={{
-                        py: 2,
-                        transition: 'background 0.2s',
-                        '&:hover': {
-                          background: 'rgba(34, 139, 34, 0.1)'
-                        }
-                      }}
-                      secondaryAction={
-                        canDelete(sighting) ? (
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => handleDeleteSighting(sighting)}
-                            sx={{
-                              color: 'rgba(255,255,255,0.4)',
-                              '&:hover': {
-                                color: '#CD5C5C',
-                                background: 'rgba(205, 92, 92, 0.1)'
-                              }
-                            }}>
-                            <DeleteIcon />
-                          </IconButton>
-                        ) : (
-                          // Show "Other tracker" chip for other users' sightings
-                          <Tooltip title="Not your sighting, buddy!">
-                            <Chip
-                              label="Other tracker"
-                              size="small"
-                              sx={{
-                                height: 22,
-                                fontSize: '0.7rem',
-                                background: 'rgba(100, 181, 246, 0.15)',
-                                color: 'rgba(100, 181, 246, 0.7)',
-                                border: '1px solid rgba(100, 181, 246, 0.3)'
-                              }}
-                            />
-                          </Tooltip>
-                        )
-                      }>
-                      <ListItemIcon>
-                        <Box sx={{ fontSize: 24 }}>👣</Box>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography sx={{ color: '#C8E6C9', fontWeight: 500 }}>{sighting.comments}</Typography>
-                        }
-                        secondary={
-                          <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                            <Typography component="span" variant="caption" sx={{ color: 'rgba(143, 188, 143, 0.6)' }}>
-                              📅 {formatDate(sighting.date)}
-                            </Typography>
-                            {!sighting.user_id && (
-                              <Chip
-                                label="Local"
-                                size="small"
-                                sx={{
-                                  height: 18,
-                                  fontSize: '0.65rem',
-                                  background: 'rgba(139, 69, 19, 0.2)',
-                                  color: '#CD853F',
-                                  border: '1px solid rgba(139, 69, 19, 0.3)'
-                                }}
-                              />
-                            )}
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  </Box>
-                ))}
-              </List>
+              <SightingsList
+                sightings={sightings}
+                canDelete={canDelete}
+                onDelete={handleDeleteSighting}
+                formatDate={formatDate}
+              />
             )}
           </Paper>
 
@@ -746,9 +831,6 @@ export default function Sightings() {
 
         {/* Easter egg - hiding bigfoot */}
         <HidingBigfoot id="sightings-page" size={45} opacity={0.1} />
-
-        {/* Floating sync status indicator */}
-        <SyncStatusIndicator />
       </Box>
     </SessionGuard>
   );
