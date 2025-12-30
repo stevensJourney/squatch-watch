@@ -18,6 +18,12 @@ const walkRight = keyframes`
   50% { opacity: 0.3; transform: translateY(0); }
 `;
 
+const peekAnimation = keyframes`
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-5px) rotate(-3deg); }
+  75% { transform: translateX(5px) rotate(3deg); }
+`;
+
 export const LoadingScreen = ({
   message = 'Tracking Bigfoot...',
   submessage = 'Following the footprints'
@@ -52,7 +58,9 @@ export const LoadingScreen = ({
       </Box>
     </Box>
 
-    <BigfootIcon size={80} />
+    <Box sx={{ animation: `${peekAnimation} 2s ease-in-out infinite` }}>
+      <BigfootIcon size={100} />
+    </Box>
 
     <Typography
       variant="h5"

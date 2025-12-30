@@ -61,23 +61,100 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
   }
 
   /**
-   * Initialize the connector - fetches existing session or signs in anonymously
+   * Sign in with email and password
+   */
+  async signInWithEmail(email: string, password: string): Promise<void> {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data.session) {
+      throw new Error('Failed to sign in');
+    }
+
+    this._session = data.session;
+    this._initialized = true;
+
+    // Listen for auth state changes
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this._session = session;
+    });
+  }
+
+  /**
+   * Sign up with email and password
+   */
+  async signUpWithEmail(email: string, password: string): Promise<void> {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    // Note: User may need to verify email before session is available
+    if (data.session) {
+      this._session = data.session;
+      this._initialized = true;
+
+      // Listen for auth state changes
+      supabase.auth.onAuthStateChange((_event, session) => {
+        this._session = session;
+      });
+    }
+  }
+
+  /**
+   * Sign in anonymously
+   */
+  async signInAnonymously(): Promise<void> {
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data.session) {
+      throw new Error('Failed to create anonymous session');
+    }
+
+    this._session = data.session;
+    this._initialized = true;
+
+    // Listen for auth state changes
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this._session = session;
+    });
+  }
+
+  /**
+   * Sign out the current user
+   */
+  async signOut(): Promise<void> {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
+    this._session = null;
+    this._initialized = false;
+  }
+
+  /**
+   * Initialize the connector - checks for existing session and sets up auth listener.
+   * Does not automatically sign in - call signInWithEmail, signUpWithEmail, or signInAnonymously separately.
    */
   async init(): Promise<void> {
     if (this._initialized) return;
 
-    const hasSession = await this.hasExistingSession();
-    if (!hasSession) {
-      // Sign in anonymously if no session exists
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        throw error;
-      }
-      if (!data.session) {
-        throw new Error('Failed to create anonymous session');
-      }
-      this._session = data.session;
-    }
+    // Check for existing session
+    await this.hasExistingSession();
 
     this._initialized = true;
 
@@ -89,11 +166,7 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
   async fetchCredentials() {
     if (!this._session) {
-      await this.init();
-    }
-
-    if (!this._session) {
-      throw new Error('No session available');
+      throw new Error('No session available - sign in first');
     }
 
     return {
@@ -110,6 +183,14 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       return;
     }
 
+    // Get current user ID to patch into records
+    const currentUserId = this.currentUserId;
+
+    // If no session, throw to retry later when user signs in
+    if (!currentUserId) {
+      throw new Error('No session - cannot upload. Sign in to sync data.');
+    }
+
     try {
       // Note: If transactional consistency is important, use database functions
       // or edge functions to process the entire transaction in a single call.
@@ -119,11 +200,20 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
         switch (op.op) {
           case 'PUT':
-            const record = { ...op.opData, id: op.id };
+            // Patch in the current user ID if the record has a user_id field
+            const record: Record<string, unknown> = { ...op.opData, id: op.id };
+            if ('user_id' in record || op.table === 'sightings') {
+              record.user_id = currentUserId;
+            }
             result = await table.upsert(record);
             break;
           case 'PATCH':
-            result = await table.update(op.opData).eq('id', op.id);
+            // Patch in the current user ID for updates as well
+            const updateData: Record<string, unknown> = { ...op.opData };
+            if ('user_id' in updateData || op.table === 'sightings') {
+              updateData.user_id = currentUserId;
+            }
+            result = await table.update(updateData).eq('id', op.id);
             break;
           case 'DELETE':
             result = await table.delete().eq('id', op.id);

@@ -1,15 +1,11 @@
 import { BigfootIcon } from '@/components/BigfootIcon';
-import { LoadingScreen } from '@/components/LoadingScreen';
-import { supabaseConnector } from '@/services/SupabaseConnector';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { Alert, Box, Button, Card, CardContent, Chip, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, Typography } from '@mui/material';
 import { usePowerSync } from '@powersync/react';
 import { useEffect, useState } from 'react';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-
-type InitState = 'checking' | 'signing-in' | 'ready' | 'error';
+type InitState = 'initializing' | 'ready' | 'error';
 
 interface ErrorDetails {
   message: string;
@@ -22,26 +18,21 @@ interface PowerSyncInitializerProps {
   children: React.ReactNode;
 }
 
+/**
+ * PowerSyncInitializer handles initializing the local database.
+ * Authentication and connection to backend is handled by the sign-in page.
+ */
 export const PowerSyncInitializer = ({ children }: PowerSyncInitializerProps) => {
   const powerSync = usePowerSync();
-  // Start with 'checking' - we'll quickly determine if a session exists
-  const [state, setState] = useState<InitState>('checking');
+  const [state, setState] = useState<InitState>('initializing');
   const [error, setError] = useState<ErrorDetails | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        // First, check if we have an existing session (fast path)
-        const hasSession = await supabaseConnector.hasExistingSession();
-
-        if (!hasSession) {
-          // No existing session - need to sign in anonymously
-          setState('signing-in');
-          await supabaseConnector.init();
-        }
-
-        // Connect to PowerSync (don't await - let it connect in background)
-        powerSync.connect(supabaseConnector);
+        // Just ensure the database is ready
+        // Connection to backend is handled elsewhere (index page)
+        await powerSync.init();
         setState('ready');
       } catch (err) {
         const errorDetails: ErrorDetails = {
@@ -58,13 +49,8 @@ export const PowerSyncInitializer = ({ children }: PowerSyncInitializerProps) =>
     init();
   }, [powerSync]);
 
-  // Only show loading screen during sign-in (not for quick session check)
-  if (state === 'signing-in') {
-    return <LoadingScreen message="Entering the forest..." submessage="Creating anonymous tracker session" />;
-  }
-
-  if (state === 'checking') {
-    // Brief check - don't show loading, just render nothing or a minimal placeholder
+  if (state === 'initializing') {
+    // Brief initialization - don't show loading screen
     return null;
   }
 
@@ -101,24 +87,10 @@ export const PowerSyncInitializer = ({ children }: PowerSyncInitializerProps) =>
             </Box>
 
             <Typography variant="body1" sx={{ color: 'rgba(222, 184, 135, 0.9)', mb: 2, textAlign: 'center' }}>
-              We couldn&apos;t establish a connection to track Bigfoot sightings.
+              We couldn&apos;t initialize the local database.
               <br />
-              The anonymous sign-in via Supabase Auth failed.
+              This is needed to track Bigfoot sightings.
             </Typography>
-
-            <Box sx={{ mb: 2, textAlign: 'center' }}>
-              <Chip
-                label={SUPABASE_URL || 'No Supabase URL configured'}
-                size="small"
-                sx={{
-                  background: 'rgba(139, 69, 19, 0.2)',
-                  color: 'rgba(222, 184, 135, 0.8)',
-                  fontFamily: 'monospace',
-                  fontSize: '11px',
-                  border: '1px solid rgba(139, 69, 19, 0.3)'
-                }}
-              />
-            </Box>
 
             <Alert
               severity="error"

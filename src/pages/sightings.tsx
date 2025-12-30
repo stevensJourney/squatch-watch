@@ -1,15 +1,24 @@
 import { BigfootIcon } from '@/components/BigfootIcon';
+import { HidingBigfoot } from '@/components/HidingBigfoot';
 import { useSupabaseConnector } from '@/services/SupabaseConnectorProvider';
 import AddIcon from '@mui/icons-material/Add';
+import CloudDoneIcon from '@mui/icons-material/CloudDone';
+import CloudOffIcon from '@mui/icons-material/CloudOff';
+import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ForestIcon from '@mui/icons-material/Forest';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LogoutIcon from '@mui/icons-material/Logout';
+import SyncIcon from '@mui/icons-material/Sync';
+import UploadIcon from '@mui/icons-material/Upload';
 import {
   Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
   Container,
   Dialog,
   DialogActions,
@@ -28,16 +37,17 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
-import { usePowerSync, useQuery } from '@powersync/react';
+import { usePowerSync, useQuery, useStatus } from '@powersync/react';
 import { useFormik } from 'formik';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 interface Sighting {
   id: string;
   date: string;
   comments: string;
-  user_id: string;
+  user_id: string | null;
 }
 
 // Fun random taglines for empty state
@@ -64,10 +74,12 @@ const getRandomMessage = (messages: string[]) => {
 
 export default function Sightings() {
   const powerSync = usePowerSync();
+  const status = useStatus();
   const connector = useSupabaseConnector();
+  const router = useRouter();
   const { data: sightings } = useQuery<Sighting>('SELECT * FROM sightings ORDER BY date DESC');
 
-  // Get user ID synchronously from the initialized connector
+  // Get user ID synchronously from the initialized connector (may be null if not signed in)
   const currentUserId = connector.currentUserId;
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -76,7 +88,7 @@ export default function Sightings() {
 
   const formik = useFormik({
     initialValues: {
-      date: '',
+      date: new Date().toISOString().split('T')[0], // Default to today
       comments: ''
     },
     validate: (values) => {
@@ -96,18 +108,18 @@ export default function Sightings() {
     },
     onSubmit: async (values, { resetForm }) => {
       try {
-        if (!currentUserId) {
-          setSnackbarMessage("Error: You're not logged in! Even anonymous hunters need an ID.");
-          setSnackbarOpen(true);
-          return;
-        }
         // Convert date input (YYYY-MM-DD) to ISO string
         const isoDate = new Date(values.date).toISOString();
+
+        // Fetch user ID asynchronously - will be null in local-only mode
+        // The connector will patch in the real user_id when uploading
+        const userId = await connector.getUserId();
+
         await powerSync.execute('INSERT INTO sightings (id, date, comments, user_id) VALUES (?, ?, ?, ?)', [
           crypto.randomUUID(),
           isoDate,
           values.comments,
-          currentUserId
+          userId // null if no session, connector patches on upload
         ]);
         resetForm();
         setDialogOpen(false);
@@ -127,7 +139,7 @@ export default function Sightings() {
   };
 
   const handleDeleteSighting = async (sighting: Sighting) => {
-    // Check if user owns this sighting
+    // User can only delete sightings where user_id matches (null === null is allowed)
     if (sighting.user_id !== currentUserId) {
       setSnackbarMessage("Hey! You can't delete someone else's sighting! 🙅");
       setSnackbarOpen(true);
@@ -145,9 +157,8 @@ export default function Sightings() {
     }
   };
 
-  const canDelete = (sighting: Sighting) => {
-    return sighting.user_id === currentUserId;
-  };
+  // User can delete if user_id matches (null === null is allowed)
+  const canDelete = (sighting: Sighting) => sighting.user_id === currentUserId;
 
   const formatDate = (isoDateStr: string) => {
     try {
@@ -167,6 +178,56 @@ export default function Sightings() {
       return isoDateStr;
     }
   };
+
+  const handleSignOut = async () => {
+    try {
+      await powerSync.disconnectAndClear();
+      await connector.signOut();
+      router.push('/');
+    } catch (error) {
+      console.warn('Sign out error:', error);
+      router.push('/');
+    }
+  };
+
+  // Get sync status info
+  const getSyncStatus = () => {
+    if (!status.connected) {
+      return {
+        icon: <CloudOffIcon />,
+        label: 'Disconnected',
+        color: '#CD5C5C',
+        tooltip: 'Not connected to sync service'
+      };
+    }
+
+    if (status.dataFlowStatus.uploading) {
+      return {
+        icon: <UploadIcon />,
+        label: 'Uploading',
+        color: '#FFB74D',
+        tooltip: 'Uploading changes...'
+      };
+    }
+
+    if (status.dataFlowStatus.downloading) {
+      return {
+        icon: <CloudSyncIcon />,
+        label: 'Syncing',
+        color: '#64B5F6',
+        tooltip: 'Downloading changes...'
+      };
+    }
+
+    return {
+      icon: <CloudDoneIcon />,
+      label: 'Synced',
+      color: '#81C784',
+      tooltip: 'All data synced'
+    };
+  };
+
+  const syncStatus = getSyncStatus();
 
   return (
     <>
@@ -228,6 +289,157 @@ export default function Sightings() {
               &ldquo;I want to believe&rdquo; — Synced offline with PowerSync
             </Typography>
           </Box>
+
+          {/* Sync Status Card */}
+          <Card
+            sx={{
+              mb: 2,
+              background: 'rgba(22, 34, 22, 0.9)',
+              border: '1px solid rgba(34, 139, 34, 0.2)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+            }}>
+            <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 1
+                }}>
+                {/* Sync Status */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Tooltip title={syncStatus.tooltip}>
+                    <Chip
+                      icon={syncStatus.icon}
+                      label={syncStatus.label}
+                      size="small"
+                      sx={{
+                        background: `${syncStatus.color}20`,
+                        color: syncStatus.color,
+                        border: `1px solid ${syncStatus.color}40`,
+                        '& .MuiChip-icon': { color: syncStatus.color }
+                      }}
+                    />
+                  </Tooltip>
+
+                  {/* Upload queue indicator */}
+                  {status.dataFlowStatus.uploading && (
+                    <Tooltip title="Changes waiting to upload">
+                      <Chip
+                        icon={
+                          <SyncIcon
+                            sx={{
+                              animation: 'spin 1s linear infinite',
+                              '@keyframes spin': {
+                                '0%': { transform: 'rotate(0deg)' },
+                                '100%': { transform: 'rotate(360deg)' }
+                              }
+                            }}
+                          />
+                        }
+                        label="Uploading..."
+                        size="small"
+                        sx={{
+                          background: 'rgba(255, 183, 77, 0.2)',
+                          color: '#FFB74D',
+                          border: '1px solid rgba(255, 183, 77, 0.4)',
+                          '& .MuiChip-icon': { color: '#FFB74D' }
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                </Box>
+
+                {/* Error indicators */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {status.lastSyncedAt && (
+                    <Typography variant="caption" sx={{ color: 'rgba(143, 188, 143, 0.5)' }}>
+                      Last sync: {new Date(status.lastSyncedAt).toLocaleTimeString()}
+                    </Typography>
+                  )}
+
+                  {/* Download errors */}
+                  {status.dataFlowStatus.downloadError && (
+                    <Tooltip
+                      title={`Download error: ${status.dataFlowStatus.downloadError.message || 'Unknown error'}`}>
+                      <Chip
+                        icon={<ErrorOutlineIcon />}
+                        label="Download Error"
+                        size="small"
+                        sx={{
+                          background: 'rgba(205, 92, 92, 0.2)',
+                          color: '#CD5C5C',
+                          border: '1px solid rgba(205, 92, 92, 0.4)',
+                          '& .MuiChip-icon': { color: '#CD5C5C' }
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+
+                  {/* Upload errors */}
+                  {status.dataFlowStatus.uploadError && (
+                    <Tooltip title={`Upload error: ${status.dataFlowStatus.uploadError.message || 'Unknown error'}`}>
+                      <Chip
+                        icon={<ErrorOutlineIcon />}
+                        label="Upload Error"
+                        size="small"
+                        sx={{
+                          background: 'rgba(205, 92, 92, 0.2)',
+                          color: '#CD5C5C',
+                          border: '1px solid rgba(205, 92, 92, 0.4)',
+                          '& .MuiChip-icon': { color: '#CD5C5C' }
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+
+                  {/* Sign out / Sign in button */}
+                  <Tooltip title={currentUserId ? 'Sign out' : 'Sign in to sync'}>
+                    <IconButton
+                      onClick={currentUserId ? handleSignOut : () => router.push('/')}
+                      size="small"
+                      sx={{
+                        color: currentUserId ? 'rgba(143, 188, 143, 0.5)' : '#FFB74D',
+                        '&:hover': {
+                          color: currentUserId ? '#8FBC8F' : '#FFA726',
+                          background: currentUserId ? 'rgba(34, 139, 34, 0.1)' : 'rgba(255, 183, 77, 0.1)'
+                        }
+                      }}>
+                      <LogoutIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+
+          {/* Local only notice - show when not signed in */}
+          {!currentUserId && (
+            <Alert
+              severity="info"
+              sx={{
+                mb: 2,
+                background: 'rgba(139, 69, 19, 0.15)',
+                border: '1px solid rgba(139, 69, 19, 0.3)',
+                color: '#DEB887',
+                '& .MuiAlert-icon': { color: '#CD853F' }
+              }}
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => router.push('/')}
+                  sx={{ color: '#DEB887', fontWeight: 600 }}>
+                  Sign In
+                </Button>
+              }>
+              <Typography variant="body2">
+                <strong>Local Mode:</strong> Your sightings are stored on this device only. Sign in anytime to sync
+                across devices!
+              </Typography>
+            </Alert>
+          )}
 
           {/* Stats Card */}
           <Card
@@ -346,9 +558,24 @@ export default function Sightings() {
                           <Typography sx={{ color: '#C8E6C9', fontWeight: 500 }}>{sighting.comments}</Typography>
                         }
                         secondary={
-                          <Typography variant="caption" sx={{ color: 'rgba(143, 188, 143, 0.6)' }}>
-                            📅 {formatDate(sighting.date)}
-                          </Typography>
+                          <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                            <Typography component="span" variant="caption" sx={{ color: 'rgba(143, 188, 143, 0.6)' }}>
+                              📅 {formatDate(sighting.date)}
+                            </Typography>
+                            {!sighting.user_id && (
+                              <Chip
+                                label="Local"
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.65rem',
+                                  background: 'rgba(139, 69, 19, 0.2)',
+                                  color: '#CD853F',
+                                  border: '1px solid rgba(139, 69, 19, 0.3)'
+                                }}
+                              />
+                            )}
+                          </Box>
                         }
                       />
                     </ListItem>
@@ -402,6 +629,7 @@ export default function Sightings() {
                 <Typography variant="body2" sx={{ color: 'rgba(143, 188, 143, 0.7)', mb: 2 }}>
                   You saw something in the woods? Tell us everything!
                 </Typography>
+
                 <TextField
                   autoFocus
                   margin="dense"
@@ -512,6 +740,9 @@ export default function Sightings() {
             </Alert>
           </Snackbar>
         </Container>
+
+        {/* Easter egg - hiding bigfoot */}
+        <HidingBigfoot id="sightings-page" size={45} opacity={0.1} />
       </Box>
     </>
   );

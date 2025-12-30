@@ -52,6 +52,8 @@ This will automatically run the migrations in `local-dev/supabase/migrations/` t
 
 ### 4. Start PowerSync Service
 
+In the repo root directory, run:
+
 ```bash
 docker run --rm \
   -p 8080:8080 \
