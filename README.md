@@ -5,9 +5,24 @@ A demo application showcasing [PowerSync](https://www.powersync.com/) with [Next
 ## Features
 
 - 📱 **Cross-platform** - Runs on Web, iOS, and Android via Capacitor
-- 🔐 **Anonymous Auth** - Supabase anonymous sign-in for quick access
-- 🎨 **Material UI** - Beautiful dark theme with teal accents
-- 📝 **Sightings Tracker** - Demo app for recording and managing sightings
+- 🔐 **Flexible Auth** - Email/password, anonymous sign-in, or local-only mode
+- 🎨 **Forest Theme** - Beautiful dark forest theme for tracking cryptid sightings
+- 📝 **Bigfoot Tracker** - "Squatch Watch" app for recording Bigfoot sightings
+- 🔄 **Offline-First** - Works offline with PowerSync, syncs when connected
+- 🦶 **Easter Eggs** - Find the hiding Bigfoot!
+
+## Demo
+
+<table>
+  <tr>
+    <td><img src="resources/screenshot1.png" alt="Sign In Screen" width="100%"/></td>
+    <td><img src="resources/screenshot2.png" alt="Sightings Screen" width="100%"/></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Sign In - Multiple auth options</em></td>
+    <td align="center"><em>Sightings - Track Bigfoot encounters</em></td>
+  </tr>
+</table>
 
 ## Tech Stack
 
@@ -23,7 +38,7 @@ This demo can be started with local PowerSync and Supabase services.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18+)
+- [Node.js](https://nodejs.org/) (v22+)
 - [Docker](https://www.docker.com/)
 - [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started)
 
