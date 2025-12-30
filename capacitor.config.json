@@ -1,8 +1,8 @@
 {
   "appId": "com.powersync.nextjs.capacitor",
   "appName": "PowerSync Next.js Capacitor Demo",
-  "webDir": "www",
+  "webDir": "out",
   "server": {
-    "androidScheme": "https"
+    "cleartext": true
   }
 }

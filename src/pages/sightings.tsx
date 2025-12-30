@@ -535,18 +535,19 @@ export default function Sightings() {
                             <DeleteIcon />
                           </IconButton>
                         ) : (
+                          // Show "Other tracker" chip for other users' sightings
                           <Tooltip title="Not your sighting, buddy!">
-                            <span>
-                              <IconButton
-                                edge="end"
-                                aria-label="delete"
-                                disabled
-                                sx={{
-                                  color: 'rgba(255,255,255,0.15)'
-                                }}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </span>
+                            <Chip
+                              label="Other tracker"
+                              size="small"
+                              sx={{
+                                height: 22,
+                                fontSize: '0.7rem',
+                                background: 'rgba(100, 181, 246, 0.15)',
+                                color: 'rgba(100, 181, 246, 0.7)',
+                                border: '1px solid rgba(100, 181, 246, 0.3)'
+                              }}
+                            />
                           </Tooltip>
                         )
                       }>

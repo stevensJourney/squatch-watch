@@ -35,6 +35,8 @@ npm install
 
 ### 2. Copy Environment Variables
 
+The default values will work with a local development configuration. These can be edited later for a cloud configuration.
+
 ```bash
 cp .env-template .env.local
 ```
@@ -85,17 +87,13 @@ Static files will be generated in the `out/` directory.
 ### iOS
 
 ```bash
-npm run build
-npx cap sync ios
-npx cap open ios
+npm run run:ios
 ```
 
 ### Android
 
 ```bash
-npm run build
-npx cap sync android
-npx cap open android
+npm run run:android
 ```
 
 ## Environment Variables
@@ -112,7 +110,3 @@ npx cap open android
 - [Supabase Documentation](https://supabase.com/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Capacitor Documentation](https://capacitorjs.com/docs)
-
-## License
-
-MIT
