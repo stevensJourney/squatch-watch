@@ -1,5 +1,7 @@
 import { BigfootIcon } from '@/components/BigfootIcon';
 import { HidingBigfoot } from '@/components/HidingBigfoot';
+import { SessionGuard } from '@/components/SessionGuard';
+import { SyncStatusIndicator } from '@/components/SyncStatusIndicator';
 import { useSupabaseConnector } from '@/services/SupabaseConnectorProvider';
 import AddIcon from '@mui/icons-material/Add';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
@@ -230,7 +232,7 @@ export default function Sightings() {
   const syncStatus = getSyncStatus();
 
   return (
-    <>
+    <SessionGuard>
       <Head>
         <title>Squatch Watch | Bigfoot Sighting Tracker</title>
         <meta name="description" content="Track and report Bigfoot, Sasquatch, and cryptid sightings" />
@@ -744,7 +746,10 @@ export default function Sightings() {
 
         {/* Easter egg - hiding bigfoot */}
         <HidingBigfoot id="sightings-page" size={45} opacity={0.1} />
+
+        {/* Floating sync status indicator */}
+        <SyncStatusIndicator />
       </Box>
-    </>
+    </SessionGuard>
   );
 }
