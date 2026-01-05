@@ -370,7 +370,7 @@ export default function SignInPage() {
                       background: 'rgba(139, 69, 19, 0.1)'
                     }
                   }}>
-                  📱 Local Only (No Sync)
+                  📱 Local First (Sync Later)
                 </Button>
               </Box>
 
