@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.pnpmfile.cjs
 
 # testing
 /coverage
@@ -41,9 +42,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# capacitor
-android
-ios
+# capacitor build artifacts
+ios/App/Pods
+ios/App/build
+ios/App/DerivedData
+ios/DerivedData
+android/.gradle
+android/app/build
+android/build
+android/capacitor-cordova-android-plugins/build
 www
 
 # @powersync workers 

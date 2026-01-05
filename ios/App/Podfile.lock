@@ -1,0 +1,70 @@
+PODS:
+  - Capacitor (7.4.4):
+    - CapacitorCordova
+  - CapacitorCamera (7.0.3):
+    - Capacitor
+  - CapacitorCommunitySqlite (7.0.2):
+    - Capacitor
+    - SQLCipher
+    - ZIPFoundation
+  - CapacitorCordova (7.4.4)
+  - CapacitorFilesystem (7.1.6):
+    - Capacitor
+    - IONFilesystemLib (~> 1.0.1)
+  - IONFilesystemLib (1.0.1)
+  - powersync-sqlite-core (0.4.10)
+  - PowersyncCapacitor (0.1.3):
+    - Capacitor
+    - powersync-sqlite-core (~> 0.4.6)
+    - SQLCipher (~> 4.0)
+  - SQLCipher (4.10.0):
+    - SQLCipher/standard (= 4.10.0)
+  - SQLCipher/common (4.10.0)
+  - SQLCipher/standard (4.10.0):
+    - SQLCipher/common
+  - ZIPFoundation (0.9.20)
+
+DEPENDENCIES:
+  - "Capacitor (from `../../node_modules/.pnpm/@capacitor+ios@7.4.4_@capacitor+core@7.4.4/node_modules/@capacitor/ios`)"
+  - "CapacitorCamera (from `../../node_modules/.pnpm/@capacitor+camera@7.0.3_@capacitor+core@7.4.4/node_modules/@capacitor/camera`)"
+  - "CapacitorCommunitySqlite (from `../../node_modules/.pnpm/@capacitor-community+sqlite@7.0.2_@capacitor+core@7.4.4/node_modules/@capacitor-community/sqlite`)"
+  - "CapacitorCordova (from `../../node_modules/.pnpm/@capacitor+ios@7.4.4_@capacitor+core@7.4.4/node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/.pnpm/@capacitor+filesystem@7.1.6_@capacitor+core@7.4.4/node_modules/@capacitor/filesystem`)"
+  - "PowersyncCapacitor (from `../../node_modules/.pnpm/@powersync+capacitor@file+..+..+powersync-react-native-sdk+packages+capacitor_@capacito_2cb72f823fd23cbcd353b5a63c57be99/node_modules/@powersync/capacitor`)"
+
+SPEC REPOS:
+  trunk:
+    - IONFilesystemLib
+    - powersync-sqlite-core
+    - SQLCipher
+    - ZIPFoundation
+
+EXTERNAL SOURCES:
+  Capacitor:
+    :path: "../../node_modules/.pnpm/@capacitor+ios@7.4.4_@capacitor+core@7.4.4/node_modules/@capacitor/ios"
+  CapacitorCamera:
+    :path: "../../node_modules/.pnpm/@capacitor+camera@7.0.3_@capacitor+core@7.4.4/node_modules/@capacitor/camera"
+  CapacitorCommunitySqlite:
+    :path: "../../node_modules/.pnpm/@capacitor-community+sqlite@7.0.2_@capacitor+core@7.4.4/node_modules/@capacitor-community/sqlite"
+  CapacitorCordova:
+    :path: "../../node_modules/.pnpm/@capacitor+ios@7.4.4_@capacitor+core@7.4.4/node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/.pnpm/@capacitor+filesystem@7.1.6_@capacitor+core@7.4.4/node_modules/@capacitor/filesystem"
+  PowersyncCapacitor:
+    :path: "../../node_modules/.pnpm/@powersync+capacitor@file+..+..+powersync-react-native-sdk+packages+capacitor_@capacito_2cb72f823fd23cbcd353b5a63c57be99/node_modules/@powersync/capacitor"
+
+SPEC CHECKSUMS:
+  Capacitor: 09d9ff8e9618e8c4b3cab2bbee34a17215dd2fef
+  CapacitorCamera: 6ef67fd287de230ebd8cda05f2a7ffd44a48e568
+  CapacitorCommunitySqlite: b8e23cd2fd5bff7da8cb2a3a1cb3a6ffb9714a32
+  CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
+  CapacitorFilesystem: 2267b9183bfecb9e5b8163b79685c9efb5ed0a09
+  IONFilesystemLib: 89258b8e3e85465da93127d25d7ce37f977e8a6f
+  powersync-sqlite-core: b30017e077c91915d53faebc5f7245384df78275
+  PowersyncCapacitor: 2b574e730137d52eaea2b8781774cf3faf7f16ef
+  SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
+  ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
+
+PODFILE CHECKSUM: 3be733099c33adcc8fa97faa2734589296b00c04
+
+COCOAPODS: 1.16.2
