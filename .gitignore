@@ -42,9 +42,22 @@ yarn-error.log*
 next-env.d.ts
 
 # capacitor
-android
-ios
 www
+
+# Android build artifacts (keep android/ tracked)
+android/app/build/
+android/.gradle/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+android/*.iml
+android/local.properties
+
+# iOS build artifacts (keep ios/ tracked)
+ios/App/Pods/
+ios/DerivedData/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/*.xcworkspace/xcuserdata/
 
 # @powersync workers 
 public/@powersync
