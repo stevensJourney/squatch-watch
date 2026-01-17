@@ -9,8 +9,14 @@
     "start": "next start",
     "lint": "eslint",
     "build:capacitor": "next build && npx cap sync",
-    "run:android": "next build && npx cap sync android && npx cap run android",
-    "run:ios": "next build && npx cap sync ios && npx cap run ios"
+    "sync:android": "npx cap sync android",
+    "sync:ios": "npx cap sync ios",
+    "run:android": "next build && pnpm sync:android && npx cap run android",
+    "watch:android": "tsx scripts/watch.ts android emulator",
+    "watch:android:device": "tsx scripts/watch.ts android device",
+    "run:ios": "next build && pnpm sync:ios && npx cap run ios",
+    "watch:ios": "tsx scripts/watch.ts ios emulator",
+    "watch:ios:device": "tsx scripts/watch.ts ios device"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^7.0.2",
@@ -22,11 +28,13 @@
     "@journeyapps/wa-sqlite": "^1.4.1",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
+    "@mui/system": "^7.3.7",
     "@powersync/capacitor": "^0.2.0",
     "@powersync/react": "^1.8.2",
     "@powersync/web": "^1.30.0",
     "@supabase/supabase-js": "^2.89.0",
     "@types/react-window": "^2.0.0",
+    "concurrently": "^9.2.1",
     "formik": "^2.4.9",
     "next": "16.1.1",
     "react": "19.2.3",
@@ -38,8 +46,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "commander": "^12.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "tsx": "^4.7.0",
     "typescript": "^5"
   }
 }

@@ -1,8 +1,0 @@
-{
-  "appId": "com.powersync.nextjs.capacitor",
-  "appName": "PowerSync Next.js Capacitor Demo",
-  "webDir": "out",
-  "server": {
-    "cleartext": true
-  }
-}

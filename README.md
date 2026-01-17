@@ -89,6 +89,58 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
+## Mobile Development (Live Reload)
+
+For rapid mobile development with live reload, use the watch commands. These start a Next.js dev server and deploy the app to your device/emulator with the webview pointing to your dev server.
+
+### Prerequisites
+
+- **Android**: [Android Studio](https://developer.android.com/studio) with an emulator or physical device connected
+- **iOS**: [Xcode](https://developer.apple.com/xcode/) with a simulator or physical device (macOS only)
+
+### Android
+
+```bash
+# Emulator
+pnpm watch:android
+
+# Physical device (connected via USB/WiFi)
+pnpm watch:android:device
+```
+
+### iOS
+
+```bash
+# Simulator
+pnpm watch:ios
+
+# Physical device
+pnpm watch:ios:device
+```
+
+### Options
+
+The watch script supports the following options:
+
+```bash
+# Custom port
+tsx scripts/watch.ts android emulator --port 3001
+
+# View all options
+tsx scripts/watch.ts --help
+```
+
+### How it Works
+
+1. Sets environment variables for live reload configuration
+2. Syncs Capacitor config (updates webview URL to point to dev server)
+3. Starts Next.js dev server
+4. Waits for server to be ready
+5. Deploys app to device/emulator (interactive device selection)
+6. Keeps dev server running for hot reload
+
+Press `Ctrl+C` to stop everything.
+
 ## Building for Production
 
 ### Web
