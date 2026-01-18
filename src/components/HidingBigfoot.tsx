@@ -1,6 +1,7 @@
 import { Box, Tooltip } from '@mui/material';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
+
+const basePath = process.env.NEXT_PUBLIC_GITHUB_PAGES_BASE_PATH || '';
 
 // Fun messages when you find the hiding bigfoot
 const DISCOVERY_MESSAGES = [
@@ -76,7 +77,8 @@ export const HidingBigfoot = ({ id = 'default', size = 40, opacity = 0.15 }: Hid
             '75%': { transform: `rotate(${position.rotation + 5}deg) scale(1.2)` }
           }
         }}>
-        <Image src="/Bigfoot.png" alt="" width={size} height={size} style={{ objectFit: 'contain' }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`${basePath}/Bigfoot.png`} alt="" width={size} height={size} style={{ objectFit: 'contain' }} />
       </Box>
     </Tooltip>
   );

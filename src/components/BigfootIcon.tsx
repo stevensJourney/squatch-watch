@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
-import Image from 'next/image';
+
+const basePath = process.env.NEXT_PUBLIC_GITHUB_PAGES_BASE_PATH || '';
 
 interface BigfootIconProps {
   size?: number;
@@ -20,7 +21,8 @@ export const BigfootIcon = ({ size = 48, className, useImage = true }: BigfootIc
           justifyContent: 'center',
           filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))'
         }}>
-        <Image src="/Bigfoot.png" alt="Bigfoot" width={size} height={size} style={{ objectFit: 'contain' }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`${basePath}/Bigfoot.png`} alt="Bigfoot" width={size} height={size} style={{ objectFit: 'contain' }} />
       </Box>
     );
   }
