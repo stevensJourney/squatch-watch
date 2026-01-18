@@ -13,7 +13,7 @@ A demo application showcasing [PowerSync](https://www.powersync.com/) with [Next
 
 ## Demo
 
-Try the live demo: **[stevensjourney.github.io/next-capacitor-demo](https://stevensjourney.github.io/next-capacitor-demo/)**
+Try the live demo: **[stevensjourney.github.io/squatch-watch](https://stevensjourney.github.io/squatch-watch/)**
 
 > Note: The demo runs in local-only mode without a backend. Data is stored locally in your browser using PowerSync's SQLite.
 
