@@ -9,6 +9,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import {
   Alert,
+  AlertTitle,
   Box,
   Button,
   Card,
@@ -126,6 +127,8 @@ export default function SignInPage() {
     return <LoadingScreen message="Checking the trail..." submessage="Looking for existing tracks" />;
   }
 
+  const isDemoMode = !process.env.NEXT_PUBLIC_POWERSYNC_URL;
+
   return (
     <>
       <Head>
@@ -154,6 +157,12 @@ export default function SignInPage() {
             pointerEvents: 'none'
           }
         }}>
+          {isDemoMode && (
+            <Alert severity="warning" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1000 }}>
+              <AlertTitle>Warning</AlertTitle>
+              <Typography variant="body1">This is a demo mode. PowerSync is not configured. Only the local database is supported. Report your sightings locally. Share them with the world later.</Typography>
+            </Alert>
+          )}
         <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
           {/* Header */}
           <Box sx={{ mb: 4, textAlign: 'center' }}>
@@ -317,7 +326,7 @@ export default function SignInPage() {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  disabled={loading}
+                  disabled={loading || isDemoMode}
                   startIcon={<EmailIcon />}
                   sx={{
                     py: 1.5,
@@ -341,7 +350,7 @@ export default function SignInPage() {
                 <Button
                   fullWidth
                   variant="outlined"
-                  disabled={loading}
+                  disabled={loading || isDemoMode}
                   onClick={handleAnonymousSignIn}
                   startIcon={<PersonOffIcon />}
                   sx={{
