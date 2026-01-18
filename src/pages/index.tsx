@@ -137,7 +137,12 @@ export default function SignInPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      {isDemoMode && (
+            <Alert severity="warning">
+              <AlertTitle>Warning</AlertTitle>
+              <Typography variant="body1">This is a demo mode. PowerSync is not configured. Only the local database is supported. Report your sightings locally. Share them with the world later.</Typography>
+            </Alert>
+          )}
       <Box
         sx={{
           minHeight: '100vh',
@@ -157,12 +162,7 @@ export default function SignInPage() {
             pointerEvents: 'none'
           }
         }}>
-          {isDemoMode && (
-            <Alert severity="warning" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1000 }}>
-              <AlertTitle>Warning</AlertTitle>
-              <Typography variant="body1">This is a demo mode. PowerSync is not configured. Only the local database is supported. Report your sightings locally. Share them with the world later.</Typography>
-            </Alert>
-          )}
+       
         <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
           {/* Header */}
           <Box sx={{ mb: 4, textAlign: 'center' }}>
