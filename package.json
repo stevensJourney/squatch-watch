@@ -39,6 +39,7 @@
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-infinite-scroll-component": "^6.1.1",
     "react-window": "^2.2.3"
   },
   "devDependencies": {

@@ -4,8 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: 4dfoluw6at57ct3teduzn2ojje
-
 importers:
 
   .:
@@ -41,17 +39,14 @@ importers:
         specifier: ^7.3.7
         version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3))(@types/react@19.2.8)(react@19.2.3)
       '@powersync/capacitor':
-        specifier: file:/Users/stevenontong/Documents/platform_code/powersync/powersync-react-native-sdk/packages/capacitor
-        version: file:../../powersync-react-native-sdk/packages/capacitor(@capacitor-community/sqlite@7.0.3(@capacitor/core@7.4.5))(@powersync/web@file:../../powersync-react-native-sdk/packages/web(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@file:../../powersync-react-native-sdk/packages/common))
-      '@powersync/common':
-        specifier: file:/Users/stevenontong/Documents/platform_code/powersync/powersync-react-native-sdk/packages/common
-        version: file:../../powersync-react-native-sdk/packages/common
+        specifier: ^0.2.0
+        version: 0.2.0(@capacitor-community/sqlite@7.0.3(@capacitor/core@7.4.5))(@powersync/web@1.31.0(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@1.45.0))
       '@powersync/react':
-        specifier: file:/Users/stevenontong/Documents/platform_code/powersync/powersync-react-native-sdk/packages/react
-        version: file:../../powersync-react-native-sdk/packages/react(@powersync/common@file:../../powersync-react-native-sdk/packages/common)(react@19.2.3)
+        specifier: ^1.8.2
+        version: 1.8.2(@powersync/common@1.45.0)(react@19.2.3)
       '@powersync/web':
-        specifier: file:/Users/stevenontong/Documents/platform_code/powersync/powersync-react-native-sdk/packages/web
-        version: file:../../powersync-react-native-sdk/packages/web(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@file:../../powersync-react-native-sdk/packages/common)
+        specifier: ^1.30.0
+        version: 1.31.0(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@1.45.0)
       '@supabase/supabase-js':
         specifier: ^2.89.0
         version: 2.90.1
@@ -73,6 +68,9 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      react-infinite-scroll-component:
+        specifier: ^6.1.1
+        version: 6.1.1(react@19.2.3)
       react-window:
         specifier: ^2.2.3
         version: 2.2.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -838,27 +836,27 @@ packages:
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
-  '@powersync/capacitor@file:../../powersync-react-native-sdk/packages/capacitor':
-    resolution: {directory: ../../powersync-react-native-sdk/packages/capacitor, type: directory}
+  '@powersync/capacitor@0.2.0':
+    resolution: {integrity: sha512-dYaQb95be4huESdxiLGUVJtaI8gFgRhrX+r5wxLCMI61Fe7QLeoNsz3XMoJ+FxbOn6mnrdaMZHJFSwIsMW5nfg==}
     peerDependencies:
       '@capacitor-community/sqlite': ^7.0.2
-      '@powersync/web': workspace:^1.30.0
+      '@powersync/web': ^1.30.0
 
-  '@powersync/common@file:../../powersync-react-native-sdk/packages/common':
-    resolution: {directory: ../../powersync-react-native-sdk/packages/common, type: directory}
+  '@powersync/common@1.45.0':
+    resolution: {integrity: sha512-C0r0Lago5MPcGiXSQhX6CDEqmHuMLjHZJzHjk61un1cvn+7SDoJrX1KTln+HuvoLovBTKK/DUJoAGzpTCIFF5Q==}
 
-  '@powersync/react@file:../../powersync-react-native-sdk/packages/react':
-    resolution: {directory: ../../powersync-react-native-sdk/packages/react, type: directory}
+  '@powersync/react@1.8.2':
+    resolution: {integrity: sha512-15z8JKt66dq2bqX2P7QQ71eUIx3DWLc5WMdB/PDc9MIAHf1SERqKfzbzWGxKplQGHC/GogDA7G8IDoRadhNXOA==}
     peerDependencies:
-      '@powersync/common': workspace:^1.45.0
+      '@powersync/common': ^1.41.1
       react: '*'
 
-  '@powersync/web@file:../../powersync-react-native-sdk/packages/web':
-    resolution: {directory: ../../powersync-react-native-sdk/packages/web, type: directory}
+  '@powersync/web@1.31.0':
+    resolution: {integrity: sha512-jjK2BxHbbhjjbruBFWdqGJkXm/G5VYTk8CKsH6o+xcwVc3ADAN8i+7UE0LxmJzNkdL2O20XTigqt+f9grK71qw==}
     hasBin: true
     peerDependencies:
       '@journeyapps/wa-sqlite': ^1.4.1
-      '@powersync/common': workspace:^1.45.0
+      '@powersync/common': ^1.45.0
 
   '@rollup/rollup-darwin-arm64@4.34.9':
     resolution: {integrity: sha512-0CY3/K54slrzLDjOA7TOjN1NuLKERBgk9nY5V34mhmuu673YNb+7ghaDUs6N0ujXR7fz5XaS5Aa6d2TNxZd0OQ==}
@@ -2300,6 +2298,11 @@ packages:
   react-fast-compare@2.0.4:
     resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
 
+  react-infinite-scroll-component@6.1.1:
+    resolution: {integrity: sha512-R8YoOyiNDynSWmfVme5LHslsKrP+/xcRUWR2ies8UgUab9dtyw5ECnMCVPPmnmjjF4MWQmfVdRwRWcWaDgeyMA==}
+    peerDependencies:
+      react: '>=16.0.0'
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -2564,6 +2567,10 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+
+  throttle-debounce@2.3.0:
+    resolution: {integrity: sha512-H7oLPV0P7+jgvrk+6mwwwBDmxTaxnu9HMXmloNLXwnNO0ZxZ31Orah2n8lU1eMPvsaowP2CX+USCgyovXfdOFQ==}
+    engines: {node: '>=8'}
 
   through2@4.0.2:
     resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
@@ -3470,26 +3477,26 @@ snapshots:
 
   '@popperjs/core@2.11.8': {}
 
-  '@powersync/capacitor@file:../../powersync-react-native-sdk/packages/capacitor(@capacitor-community/sqlite@7.0.3(@capacitor/core@7.4.5))(@powersync/web@file:../../powersync-react-native-sdk/packages/web(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@file:../../powersync-react-native-sdk/packages/common))':
+  '@powersync/capacitor@0.2.0(@capacitor-community/sqlite@7.0.3(@capacitor/core@7.4.5))(@powersync/web@1.31.0(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@1.45.0))':
     dependencies:
       '@capacitor-community/sqlite': 7.0.3(@capacitor/core@7.4.5)
-      '@powersync/web': file:../../powersync-react-native-sdk/packages/web(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@file:../../powersync-react-native-sdk/packages/common)
+      '@powersync/web': 1.31.0(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@1.45.0)
       async-lock: 1.4.1
 
-  '@powersync/common@file:../../powersync-react-native-sdk/packages/common':
+  '@powersync/common@1.45.0':
     dependencies:
       async-mutex: 0.5.0
       event-iterator: 2.0.0
 
-  '@powersync/react@file:../../powersync-react-native-sdk/packages/react(@powersync/common@file:../../powersync-react-native-sdk/packages/common)(react@19.2.3)':
+  '@powersync/react@1.8.2(@powersync/common@1.45.0)(react@19.2.3)':
     dependencies:
-      '@powersync/common': file:../../powersync-react-native-sdk/packages/common
+      '@powersync/common': 1.45.0
       react: 19.2.3
 
-  '@powersync/web@file:../../powersync-react-native-sdk/packages/web(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@file:../../powersync-react-native-sdk/packages/common)':
+  '@powersync/web@1.31.0(@journeyapps/wa-sqlite@1.4.1)(@powersync/common@1.45.0)':
     dependencies:
       '@journeyapps/wa-sqlite': 1.4.1
-      '@powersync/common': file:../../powersync-react-native-sdk/packages/common
+      '@powersync/common': 1.45.0
       async-mutex: 0.5.0
       bson: 6.10.4
       comlink: 4.4.2
@@ -5128,6 +5135,11 @@ snapshots:
 
   react-fast-compare@2.0.4: {}
 
+  react-infinite-scroll-component@6.1.1(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      throttle-debounce: 2.3.0
+
   react-is@16.13.1: {}
 
   react-is@19.2.3: {}
@@ -5466,6 +5478,8 @@ snapshots:
       minizlib: 2.1.2
       mkdirp: 1.0.4
       yallist: 4.0.0
+
+  throttle-debounce@2.3.0: {}
 
   through2@4.0.2:
     dependencies:

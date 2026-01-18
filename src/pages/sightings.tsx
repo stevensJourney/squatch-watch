@@ -1,6 +1,7 @@
 import { BigfootIcon } from '@/components/BigfootIcon';
 import { HidingBigfoot } from '@/components/HidingBigfoot';
 import { SessionGuard } from '@/components/SessionGuard';
+import { SyncDiagnosticsDialog } from '@/components/SyncDiagnosticsDialog';
 import { useSupabaseConnector } from '@/services/SupabaseConnectorProvider';
 import AddIcon from '@mui/icons-material/Add';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
@@ -17,8 +18,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
   Dialog,
@@ -40,9 +39,45 @@ import { usePowerSync, useQuery, useStatus } from '@powersync/react';
 import { useFormik } from 'formik';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { List } from 'react-window';
 
+// Hook for detecting scroll direction
+function useScrollDirection() {
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  const updateScrollDir = useCallback(() => {
+    const scrollY = window.scrollY;
+    const direction = scrollY > lastScrollY.current ? 'down' : 'up';
+    
+    // Only hide if scrolled down more than 100px and still scrolling down
+    if (direction === 'down' && scrollY > 100) {
+      setIsVisible(false);
+    } else if (direction === 'up' || scrollY < 50) {
+      setIsVisible(true);
+    }
+    
+    lastScrollY.current = scrollY > 0 ? scrollY : 0;
+    ticking.current = false;
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(updateScrollDir);
+        ticking.current = true;
+      }
+    };
+    
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [updateScrollDir]);
+
+  return isVisible;
+}
 interface Sighting {
   id: string;
   date: string;
@@ -234,14 +269,23 @@ export default function Sightings() {
   const status = useStatus();
   const connector = useSupabaseConnector();
   const router = useRouter();
-  const { data: sightings } = useQuery<Sighting>('SELECT * FROM sightings ORDER BY date DESC');
+  const [sightingLimit, setSightingLimit] = useState(10);
+  const statusBarVisible = useScrollDirection();
+  const { data: intermediateSightings } = useQuery<Sighting>(/* sql */ `SELECT * FROM sightings ORDER BY date DESC LIMIT ?`, 
+    // Increment by 1 to check if there are more sightings
+    [sightingLimit + 1]
+  );
+  const {data: [sightingsCount]} = useQuery<{count: number}>(/* sql */ `SELECT COUNT(*) as count FROM sightings`);
 
+  const sightings = intermediateSightings.slice(0, sightingLimit);
+  const hasMore = sightingsCount?.count > sightingLimit;
   // Get user ID synchronously from the initialized connector (may be null if not signed in)
   const currentUserId = connector.currentUserId;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [syncDiagnosticsOpen, setSyncDiagnosticsOpen] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -412,77 +456,56 @@ export default function Sightings() {
             pointerEvents: 'none'
           }
         }}>
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          {/* Header */}
-          <Box sx={{ mb: 4, textAlign: 'center' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <BigfootIcon size={80} />
-            </Box>
-            <Typography
-              variant="h3"
-              sx={{
-                color: '#8FBC8F',
-                fontWeight: 800,
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                letterSpacing: '-0.02em'
-              }}>
-              SQUATCH WATCH
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                color: '#6B8E23',
-                fontWeight: 400,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1
-              }}>
-              <ForestIcon fontSize="small" />
-              Bigfoot Sighting Tracker
-              <ForestIcon fontSize="small" />
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'rgba(143, 188, 143, 0.5)', mt: 1, fontStyle: 'italic' }}>
-              &ldquo;I want to believe&rdquo; — Synced offline with PowerSync
-            </Typography>
-          </Box>
-
-          {/* Sync Status Card */}
-          <Card
+        {/* Floating Sync Status Bar */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1100,
+            transform: statusBarVisible ? 'translateY(0)' : 'translateY(-100%)',
+            transition: 'transform 0.3s ease-in-out',
+          }}>
+          <Box
             sx={{
-              mb: 2,
-              background: 'rgba(22, 34, 22, 0.9)',
-              border: '1px solid rgba(34, 139, 34, 0.2)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+              background: 'rgba(13, 26, 13, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderBottom: '1px solid rgba(34, 139, 34, 0.2)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.4)',
+              py: 1,
+              px: 2,
             }}>
-            <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+            <Container maxWidth="md">
               <Box
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  flexWrap: 'wrap',
                   gap: 1
                 }}>
                 {/* Sync Status */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Tooltip title={syncStatus.tooltip}>
+                  <Tooltip title={`${syncStatus.tooltip} — Click for details`}>
                     <Chip
                       icon={syncStatus.icon}
                       label={syncStatus.label}
                       size="small"
+                      onClick={() => setSyncDiagnosticsOpen(true)}
                       sx={{
                         background: `${syncStatus.color}20`,
                         color: syncStatus.color,
                         border: `1px solid ${syncStatus.color}40`,
-                        '& .MuiChip-icon': { color: syncStatus.color }
+                        cursor: 'pointer',
+                        '& .MuiChip-icon': { color: syncStatus.color },
+                        '&:hover': { background: `${syncStatus.color}30` }
                       }}
                     />
                   </Tooltip>
 
                   {/* Upload queue indicator */}
                   {status.dataFlowStatus.uploading && (
-                    <Tooltip title="Changes waiting to upload">
+                    <Tooltip title="Changes waiting to upload — Click for details">
                       <Chip
                         icon={
                           <SyncIcon
@@ -497,38 +520,38 @@ export default function Sightings() {
                         }
                         label="Uploading..."
                         size="small"
+                        onClick={() => setSyncDiagnosticsOpen(true)}
                         sx={{
                           background: 'rgba(255, 183, 77, 0.2)',
                           color: '#FFB74D',
                           border: '1px solid rgba(255, 183, 77, 0.4)',
-                          '& .MuiChip-icon': { color: '#FFB74D' }
+                          cursor: 'pointer',
+                          '& .MuiChip-icon': { color: '#FFB74D' },
+                          '&:hover': { background: 'rgba(255, 183, 77, 0.3)' }
                         }}
                       />
                     </Tooltip>
                   )}
                 </Box>
 
-                {/* Error indicators */}
+                {/* Error indicators & actions */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {status.lastSyncedAt && (
-                    <Typography variant="caption" sx={{ color: 'rgba(143, 188, 143, 0.5)' }}>
-                      Last sync: {new Date(status.lastSyncedAt).toLocaleTimeString()}
-                    </Typography>
-                  )}
-
                   {/* Download errors */}
                   {status.dataFlowStatus.downloadError && (
                     <Tooltip
-                      title={`Download error: ${status.dataFlowStatus.downloadError.message || 'Unknown error'}`}>
+                      title={`Download error — Click for details`}>
                       <Chip
                         icon={<ErrorOutlineIcon />}
-                        label="Download Error"
+                        label="Error"
                         size="small"
+                        onClick={() => setSyncDiagnosticsOpen(true)}
                         sx={{
                           background: 'rgba(205, 92, 92, 0.2)',
                           color: '#CD5C5C',
                           border: '1px solid rgba(205, 92, 92, 0.4)',
-                          '& .MuiChip-icon': { color: '#CD5C5C' }
+                          cursor: 'pointer',
+                          '& .MuiChip-icon': { color: '#CD5C5C' },
+                          '&:hover': { background: 'rgba(205, 92, 92, 0.3)' }
                         }}
                       />
                     </Tooltip>
@@ -536,16 +559,19 @@ export default function Sightings() {
 
                   {/* Upload errors */}
                   {status.dataFlowStatus.uploadError && (
-                    <Tooltip title={`Upload error: ${status.dataFlowStatus.uploadError.message || 'Unknown error'}`}>
+                    <Tooltip title={`Upload error — Click for details`}>
                       <Chip
                         icon={<ErrorOutlineIcon />}
-                        label="Upload Error"
+                        label="Error"
                         size="small"
+                        onClick={() => setSyncDiagnosticsOpen(true)}
                         sx={{
                           background: 'rgba(205, 92, 92, 0.2)',
                           color: '#CD5C5C',
                           border: '1px solid rgba(205, 92, 92, 0.4)',
-                          '& .MuiChip-icon': { color: '#CD5C5C' }
+                          cursor: 'pointer',
+                          '& .MuiChip-icon': { color: '#CD5C5C' },
+                          '&:hover': { background: 'rgba(205, 92, 92, 0.3)' }
                         }}
                       />
                     </Tooltip>
@@ -568,8 +594,100 @@ export default function Sightings() {
                   </Tooltip>
                 </Box>
               </Box>
-            </CardContent>
-          </Card>
+            </Container>
+          </Box>
+        </Box>
+
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, pt: 6 }}>
+          {/* Compact Header with side-by-side layout */}
+          <Box 
+            sx={{ 
+              mb: 3, 
+              display: 'flex', 
+              alignItems: 'center',
+              gap: 3,
+              p: 2,
+              background: 'rgba(22, 34, 22, 0.5)',
+              borderRadius: 3,
+              border: '1px solid rgba(34, 139, 34, 0.15)',
+            }}>
+            {/* Bigfoot Icon - Left side */}
+            <Box sx={{ flexShrink: 0 }}>
+              <BigfootIcon size={72} />
+            </Box>
+
+            {/* Title content - Right side */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  color: '#8FBC8F',
+                  fontWeight: 800,
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.1,
+                }}>
+                SQUATCH WATCH
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: '#6B8E23',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  mt: 0.5,
+                }}>
+                <ForestIcon sx={{ fontSize: 16 }} />
+                Bigfoot Sighting Tracker
+                <ForestIcon sx={{ fontSize: 16 }} />
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'rgba(143, 188, 143, 0.4)', 
+                  fontStyle: 'italic',
+                  display: 'block',
+                  mt: 0.5,
+                }}>
+                &ldquo;I want to believe&rdquo; — Synced offline with PowerSync
+              </Typography>
+            </Box>
+
+            {/* Stats badge - Far right */}
+            <Box 
+              sx={{ 
+                flexShrink: 0,
+                textAlign: 'center',
+                px: 2,
+                py: 1,
+                background: 'linear-gradient(145deg, rgba(34, 139, 34, 0.25) 0%, rgba(34, 139, 34, 0.1) 100%)',
+                borderRadius: 2,
+                border: '1px solid rgba(34, 139, 34, 0.3)',
+              }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  color: '#8FBC8F',
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  textShadow: '0 0 20px rgba(143, 188, 143, 0.3)'
+                }}>
+                {sightingsCount?.count ?? 0}
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'rgba(143, 188, 143, 0.5)',
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  fontSize: '0.65rem',
+                }}>
+                Sightings
+              </Typography>
+            </Box>
+          </Box>
 
           {/* Local only notice - show when not signed in */}
           {!currentUserId && (
@@ -597,37 +715,6 @@ export default function Sightings() {
               </Typography>
             </Alert>
           )}
-
-          {/* Stats Card */}
-          <Card
-            sx={{
-              mb: 3,
-              background: 'linear-gradient(145deg, rgba(34, 139, 34, 0.2) 0%, rgba(34, 139, 34, 0.05) 100%)',
-              border: '1px solid rgba(34, 139, 34, 0.3)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
-            }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="overline" sx={{ color: '#6B8E23', letterSpacing: 2 }}>
-                DOCUMENTED ENCOUNTERS
-              </Typography>
-              <Typography
-                variant="h1"
-                sx={{
-                  color: '#8FBC8F',
-                  fontWeight: 800,
-                  textShadow: '0 0 20px rgba(143, 188, 143, 0.3)'
-                }}>
-                {sightings.length}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>
-                {sightings.length === 0
-                  ? 'No sightings... yet'
-                  : sightings.length === 1
-                  ? 'credible report on file'
-                  : 'credible reports on file'}
-              </Typography>
-            </CardContent>
-          </Card>
 
           {/* Sightings List */}
           <Paper
@@ -664,12 +751,23 @@ export default function Sightings() {
                 </Typography>
               </Box>
             ) : (
-              <SightingsList
-                sightings={sightings}
-                canDelete={canDelete}
-                onDelete={handleDeleteSighting}
-                formatDate={formatDate}
-              />
+              <InfiniteScroll 
+              dataLength={sightings.length}
+              next={() => setSightingLimit(sightingLimit + 10)}
+              hasMore={hasMore}
+              loader={<div>Loading...</div>}
+              > 
+              {sightings.map((sighting, index) => (<SightingRow
+                index={index}
+                style={{}}
+                  key={sighting.id}
+                  sightings={sightings}
+                  canDelete={canDelete}
+                  onDelete={handleDeleteSighting}
+                  formatDate={formatDate}
+                />  
+              ))}
+              </InfiniteScroll>
             )}
           </Paper>
 
@@ -809,6 +907,9 @@ export default function Sightings() {
               </DialogActions>
             </form>
           </Dialog>
+
+          {/* Sync Diagnostics Dialog */}
+          <SyncDiagnosticsDialog open={syncDiagnosticsOpen} onClose={() => setSyncDiagnosticsOpen(false)} />
 
           {/* Snackbar for notifications */}
           <Snackbar
