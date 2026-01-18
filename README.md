@@ -13,16 +13,9 @@ A demo application showcasing [PowerSync](https://www.powersync.com/) with [Next
 
 ## Demo
 
-<table>
-  <tr>
-    <td><img src="resources/screenshot1.png" alt="Sign In Screen" width="100%"/></td>
-    <td><img src="resources/screenshot2.png" alt="Sightings Screen" width="100%"/></td>
-  </tr>
-  <tr>
-    <td align="center"><em>Sign In - Multiple auth options</em></td>
-    <td align="center"><em>Sightings - Track Bigfoot encounters</em></td>
-  </tr>
-</table>
+Try the live demo: **[stevensjourney.github.io/next-capacitor-demo](https://stevensjourney.github.io/next-capacitor-demo/)**
+
+> Note: The demo runs in local-only mode without a backend. Data is stored locally in your browser using PowerSync's SQLite.
 
 ## Tech Stack
 

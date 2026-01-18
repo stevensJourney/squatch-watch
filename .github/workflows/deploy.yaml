@@ -28,6 +28,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          NEXT_PUBLIC_GITHUB_PAGES_BASE_PATH: /next-capacitor-demo
 
       - name: Upload artifacts
         uses: actions/upload-pages-artifact@v4
