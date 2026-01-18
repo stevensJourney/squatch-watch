@@ -16,6 +16,9 @@ const SCHEMA = new Schema({
 
 const isWeb = !Capacitor.isNativePlatform();
 
+// Base path for assets (set via NEXT_PUBLIC_GITHUB_PAGES_BASE_PATH for GitHub Pages)
+const basePath = process.env.NEXT_PUBLIC_GITHUB_PAGES_BASE_PATH || '';
+
 const powerSync = new PowerSyncDatabase({
   schema: SCHEMA,
   database: isWeb
@@ -29,14 +32,14 @@ const powerSync = new PowerSyncDatabase({
          * powersync-web copy-assets public
          * ```
          */
-        worker: '/@powersync/worker/WASQLiteDB.umd.js'
+        worker: `${basePath}/@powersync/worker/WASQLiteDB.umd.js`
       })
     : new CapacitorSQLiteOpenFactory({
         dbFilename: 'powersync-capacitor-nextjs.db'
       }),
   ...(isWeb && {
     sync: {
-      worker: '/@powersync/worker/SharedSyncImplementation.umd.js'
+      worker: `${basePath}/@powersync/worker/SharedSyncImplementation.umd.js`
     }
   })
 });
